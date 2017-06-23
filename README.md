@@ -41,15 +41,19 @@ Pruning:
 TBD
 ---
 
- - Change the pruning to be done in one pass. Currently each of the 512 filters are pruned sequentually. This is inefficient since allocating new layers, especially fully connected layers with lots of parameters, is slow.
-In principle this can be done in a single pass.
+ - Change the pruning to be done in one pass. Currently each of the 512 filters are pruned sequentually. 
+	`
+	for layer_index, filter_index in prune_targets:
+			model = prune_vgg16_conv_layer(model, layer_index, filter_index)
+		`
 
-{% highlight python %}
 
-    for layer_index, filter_index in prune_targets:
-    	model = prune_vgg16_conv_layer(model, layer_index, filter_index)
+ 	This is inefficient since allocating new layers, especially fully connected layers with lots of parameters, is slow.
+	
+	In principle this can be done in a single pass.
 
-{% endhighlight %}
+
 
  - Change prune_vgg16_conv_layer to support additional architectures.
-  The most immediate one would be VGG with batch norm.
+ 	The most immediate one would be VGG with batch norm.
+
