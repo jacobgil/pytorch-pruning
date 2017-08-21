@@ -1,3 +1,4 @@
+import copy
 import torch
 from torch.autograd import Variable
 from torchvision import models
@@ -65,30 +66,33 @@ class FilterPrunner:
             x = module(x)
             if isinstance(module, torch.nn.modules.conv.Conv2d):
                 x.register_hook(self.compute_rank)
-                self.activations.append(x)
+                self.activations.append(self.compute_rank(activation_index))
                 self.activation_to_layer[activation_index] = layer
                 activation_index += 1
 
         return self.model.classifier(x.view(x.size(0), -1))
 
-    def compute_rank(self, grad):
-        activation_index = len(self.activations) - self.grad_index - 1
-        activation = self.activations[activation_index]
-        values = \
-            torch.sum((activation * grad), dim=0).\
-            sum(dim=2).sum(dim=3)[0, :, 0, 0].data
+    def compute_rank(self, activation_index):
+        # Returns a partial function
+        # as the callback function
+        def hook(grad):
+            activation = self.activations[activation_index]
+            values = \
+                torch.sum((activation * grad), dim=0).\
+                sum(dim=2).sum(dim=3)[0, :, 0, 0].data
 
-        # Normalize the rank by the filter dimensions
-        values = \
-            values / (activation.size(0) * activation.size(2)
-                      * activation.size(3))
+            # Normalize the rank by the filter dimensions
+            values = \
+                values / (activation.size(0) * activation.size(2)
+                          * activation.size(3))
 
-        if activation_index not in self.filter_ranks:
-            self.filter_ranks[activation_index] = \
-                torch.FloatTensor(activation.size(1)).zero_().cuda()
+            if activation_index not in self.filter_ranks:
+                self.filter_ranks[activation_index] = \
+                    torch.FloatTensor(activation.size(1)).zero_().cuda()
 
-        self.filter_ranks[activation_index] += values
-        self.grad_index += 1
+            self.filter_ranks[activation_index] += values
+            self.grad_index += 1
+        return hook
 
     def lowest_ranking_filters(self, num):
         data = []
