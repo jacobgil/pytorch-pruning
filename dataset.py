@@ -12,8 +12,10 @@ from PIL import Image
 import glob
 import os
 
+
 def loader(path, batch_size=32, num_workers=4, pin_memory=True):
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    normalize = transforms.Normalize(
+        mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     return data.DataLoader(
         datasets.ImageFolder(path,
                              transforms.Compose([
@@ -28,8 +30,10 @@ def loader(path, batch_size=32, num_workers=4, pin_memory=True):
         num_workers=num_workers,
         pin_memory=pin_memory)
 
+
 def test_loader(path, batch_size=32, num_workers=4, pin_memory=True):
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    normalize = transforms.Normalize(
+        mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     return data.DataLoader(
         datasets.ImageFolder(path,
                              transforms.Compose([
