@@ -65,8 +65,8 @@ class FilterPrunner:
         for layer, (name, module) in enumerate(self.model.features._modules.items()):
             x = module(x)
             if isinstance(module, torch.nn.modules.conv.Conv2d):
-                x.register_hook(self.compute_rank)
-                self.activations.append(self.compute_rank(activation_index))
+                x.register_hook(self.compute_rank(activation_index))
+                self.activations.append(x)
                 self.activation_to_layer[activation_index] = layer
                 activation_index += 1
 
